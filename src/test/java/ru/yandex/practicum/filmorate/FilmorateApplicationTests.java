@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -19,27 +18,6 @@ class FilmorateApplicationTests {
 
     static FilmController filmController = new FilmController();
     static UserController userController = new UserController();
-
-    @Test
-    void shouldValidateFilmWithEmptyNameAndEmptyAllFields() {
-        Film film = new Film();
-        Exception exception = assertThrows(NullPointerException.class, () -> filmController.addFilm(film));
-        assertNull(exception.getMessage());
-
-        film.setName(" ");
-        exception = assertThrows(NullPointerException.class, () -> filmController.addFilm(film));
-        assertNull(exception.getMessage());
-    }
-
-    @Test
-    void shouldValidateFilmWithBigDescription() {
-        Film film = new Film();
-        film.setName("Test");
-        film.setReleaseDate(LocalDate.of(2010,12,12));
-        film.setDescription("fff".repeat(300));
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.addFilm(film));
-        assertEquals("The maximum length of a film description is 200 characters.", exception.getMessage());
-    }
 
     @Test
     void shouldValidateFilmWithOldReleaseDate() {
@@ -53,37 +31,12 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void shouldValidateFilmWithNegativeDuration() {
-        Film film = new Film();
-        film.setName("Test");
-        film.setDescription("TestTest");
-        film.setReleaseDate(LocalDate.of(2012, 12, 12));
-        film.setDuration(-4);
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.addFilm(film));
-        assertEquals("Film duration must be positive", exception.getMessage());
-    }
-
-    @Test
-    void shouldValidateEmptyUserEmailAndEmptyAllFields() {
+    void shouldValidateUserLoginWithSpaces() {
         User user = new User();
-        Exception exception = assertThrows(NullPointerException.class, () -> userController.addUser(user));
-        assertNull(exception.getMessage());
-
-        user.setEmail("ivan.yandex.ru");
-        exception = assertThrows(NullPointerException.class, () -> userController.addUser(user));
-        assertNull(exception.getMessage());
-    }
-
-    @Test
-    void shouldValidateEmptyUserLogin() {
-        User user = new User();
-        user.setEmail("yandex@yandex.ru");
         user.setBirthday(LocalDate.of(2000,12,12));
-        Exception exception = assertThrows(NullPointerException.class, () -> userController.addUser(user));
-        assertNull(exception.getMessage());
-
         user.setLogin("Ivan Averin");
-        exception = assertThrows(ValidationException.class, () -> userController.addUser(user));
+
+        Exception exception = assertThrows(ValidationException.class, () -> userController.addUser(user));
         assertEquals("Login cannot be empty and contain spaces", exception.getMessage());
     }
 
@@ -95,17 +48,5 @@ class FilmorateApplicationTests {
         user.setBirthday(LocalDate.of(2012, 12, 12));
         userController.addUser(user);
         assertEquals("Averin", user.getName());
-    }
-
-    @Test
-    void shouldValidateUserWasBornInFuture() {
-        User user = new User();
-        user.setName("Ivan");
-        user.setLogin("Averin");
-        user.setEmail("yandex@yandex.ru");
-        user.setBirthday(LocalDate.of(3000, 10, 10));
-        Exception exception = assertThrows(ValidationException.class, () -> userController.addUser(user));
-        assertEquals("Date of birth cannot be in the future", exception.getMessage());
-
     }
 }

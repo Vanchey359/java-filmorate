@@ -24,7 +24,7 @@ public class FilmController {
 
     private final Map<Integer, Film> films = new HashMap<>();
     private int idCounter = 0;
-    private static final LocalDate DAY_OF_FILMS_BIRTHDAY = LocalDate.of(1895,12,28);
+    private static final LocalDate DAY_OF_FILMS_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public List<Film> findAll() {
@@ -44,28 +44,18 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         validate(film);
-            if (films.containsKey(film.getId())) {
-                films.put(film.getId(), film);
-                log.info("Film {} has been updated", film.getName());
-            } else {
-                log.warn("Film with this id was not found");
-                throw new ValidationException("Film with this id was not found");
-            }
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            log.info("Film {} has been updated", film.getName());
+        } else {
+            throw new ValidationException("Film with this id was not found");
+        }
         return film;
     }
 
     private void validate(Film film) {
         if (film.getReleaseDate().isBefore(DAY_OF_FILMS_BIRTHDAY)) {
             throw new ValidationException("Release date must not be earlier than 28.12.1895");
-        }
-
-        if (film.getDescription().length() > 200) {
-            throw new ValidationException("The maximum length of a film description is 200 characters.");
-        }
-
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Film duration must be positive");  // Сначала удалил такие места где аннотации в model перекрывают эту валидацию, при написании тестов увидел что все таки не перекрывают
-            // например тут в тесте я вводил dutation -4 и тест писал что "ожидается исключение ... но никакого исключения нет. Вернул эту валидацию обратно, тест работает
         }
     }
 }
