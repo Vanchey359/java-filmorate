@@ -42,13 +42,13 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            checkName(user);
-            users.put(user.getId(), user);
-            log.info("User {} updated", user.getName());
-        } else {
+        validate(user);
+        if (!users.containsKey(user.getId())) {
             throw new ValidationException("User with this id was not found");
         }
+        checkName(user);
+        users.put(user.getId(), user);
+        log.info("User {} updated", user.getName());
         return user;
     }
 

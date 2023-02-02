@@ -44,12 +44,11 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         validate(film);
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Film {} has been updated", film.getName());
-        } else {
+        if (!films.containsKey(film.getId())) {
             throw new ValidationException("Film with this id was not found");
         }
+        films.put(film.getId(), film);
+        log.info("Film {} has been updated", film.getName());
         return film;
     }
 

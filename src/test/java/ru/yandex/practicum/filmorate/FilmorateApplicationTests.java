@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 class FilmorateApplicationTests {
 
-    static FilmController filmController = new FilmController();
-    static UserController userController = new UserController();
+     FilmController filmController = new FilmController();
+     UserController userController = new UserController();
 
     @Test
-    void shouldValidateFilmWithOldReleaseDate() {
+    void addFilmShouldValidateFilmWithOldReleaseDate() {
         Film film = new Film();
         film.setName("Test");
         film.setDescription("TestTest");
@@ -31,7 +31,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void shouldValidateUserLoginWithSpaces() {
+    void addUserShouldValidateUserLoginWithSpaces() {
         User user = new User();
         user.setBirthday(LocalDate.of(2000,12,12));
         user.setLogin("Ivan Averin");
@@ -41,7 +41,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void shouldValidateUserWithEmptyName() {
+    void addUserShouldValidateUserWithEmptyName() {
         User user = new User();
         user.setEmail("yandex@yandex.ru");
         user.setLogin("Averin");
