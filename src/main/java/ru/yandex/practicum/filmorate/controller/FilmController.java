@@ -1,60 +1,63 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import javax.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int idCounter = 0;
-    private static final LocalDate DAY_OF_FILMS_BIRTHDAY = LocalDate.of(1895, 12, 28);
+    private final FilmService filmService;
 
-    @GetMapping
+    @GetMapping("/films")
     public List<Film> findAll() {
-        log.info("Got a list of all films");
-        return new ArrayList<>(films.values());
+        return filmService.getAll();
     }
 
-    @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film) {
-        validate(film);
-        film.setId(++idCounter);
-        films.put(film.getId(), film);
-        log.info("Film {} was added to the list of all films", film.getName());
-        return film;
+    @GetMapping("/films/{id}")
+    public Film findById(@PathVariable long id) {
+        return filmService.getById(id);
     }
 
-    @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        validate(film);
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Film with this id was not found");
-        }
-        films.put(film.getId(), film);
-        log.info("Film {} has been updated", film.getName());
-        return film;
+    @PostMapping(value = "/films")
+    public Film create(@Valid @RequestBody Film film) throws ValidationException {
+        return filmService.add(film);
     }
 
-    private void validate(Film film) {
-        if (film.getReleaseDate().isBefore(DAY_OF_FILMS_BIRTHDAY)) {
-            throw new ValidationException("Release date must not be earlier than 28.12.1895");
-        }
+    @PutMapping(value = "/films")
+    public Film update(@Valid @RequestBody Film film) throws ValidationException, NotFoundException {
+        return filmService.update(film);
+    }
+
+    @PutMapping(value = "/films/{id}/like/{userId}")
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping(value = "/films/{id}/like/{userId}")
+    public void removeLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping(value = "/films/popular")
+    public List<Film> getTop(@Valid @RequestParam(required = false) Integer count) {
+        return filmService.getTop(count);
     }
 }
