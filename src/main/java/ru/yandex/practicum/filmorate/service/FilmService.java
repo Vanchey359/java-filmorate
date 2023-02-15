@@ -19,6 +19,7 @@ public class FilmService {
 
     private final static int TOP = 10;
     private final FilmStorage filmStorage;
+    private final FilmValidator filmValidator;
 
     public List<Film> getAll() {
         return filmStorage.getAll();
@@ -29,24 +30,23 @@ public class FilmService {
     }
 
     public Film add(Film film) {
-        FilmValidator.validate(film);
+        filmValidator.validate(film);
         return filmStorage.add(film);
     }
 
     public Film update(Film film) {
-        FilmValidator.validate(film);
+        filmValidator.validate(film);
         return filmStorage.update(film);
     }
 
-    public Film addLike(long id, long userId) throws NotFoundException {
+    public void addLike(long id, long userId) throws NotFoundException {
         Film film = filmStorage.getById(id);
         film.addLike(userId);
         filmStorage.update(film);
         log.info("Film with id = {} was liked by user with id = {}", film.getId(), userId);
-        return film;
     }
 
-    public Film removeLike(long id, long userId) throws NotFoundException {
+    public void removeLike(long id, long userId) throws NotFoundException {
         Film film = filmStorage.getById(id);
         boolean result = film.removeLike(userId);
         if (!result) {
@@ -54,16 +54,14 @@ public class FilmService {
         }
         filmStorage.update(film);
         log.info("User with id = {} was deleted like from movie id = {}", userId, film.getId());
-        return film;
     }
 
     public List<Film> getTop(int count) {
-        if (count == 0) {
-            count = TOP;
+        if (count <= 0) {
+            throw new NotFoundException("The number of films cannot be negative or equal to zero!");
         }
-        List<Film> films = filmStorage.getAll();
-        films.sort(Comparator.comparingInt(Film::countLikes).reversed());
-        return films.stream()
+        return filmStorage.getAll().stream()
+                .sorted(Comparator.comparingInt(Film::countLikes).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }

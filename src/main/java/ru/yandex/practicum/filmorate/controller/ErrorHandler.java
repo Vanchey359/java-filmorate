@@ -18,28 +18,28 @@ public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException exception) {
-        log.error(exception.getMessage());
+        log.error(exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException exception) {
-        log.error(exception.getMessage());
+        log.error(exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Throwable exception) {
-        log.error(exception.getMessage());
+        log.error(exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
     }
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
-    class ErrorResponse {
+    private static class ErrorResponse {
         private String message;
     }
 }

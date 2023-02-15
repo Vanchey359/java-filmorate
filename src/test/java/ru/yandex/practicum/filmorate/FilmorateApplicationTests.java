@@ -16,12 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 class FilmorateApplicationTests {
 
-
+     UserValidator userValidator = new UserValidator();
+     FilmValidator filmValidator = new FilmValidator();
 
     @Test
     void createFilmShouldValidateFilmWithOldReleaseDate() {
         Film film = new Film(1, "Test", "TestTest", LocalDate.of(1300, 11, 12), 45);
-        Exception exception = assertThrows(ValidationException.class, () -> FilmValidator.validate(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmValidator.validate(film));
         assertEquals("Release date must not be earlier than 28.12.1895", exception.getMessage());
     }
 
@@ -29,14 +30,14 @@ class FilmorateApplicationTests {
     void addUserShouldValidateUserLoginWithSpaces() {
         User user = new User(1, "Test@yandex.ru", "Test Test", "Test", LocalDate.of(12,12,20));
 
-        Exception exception = assertThrows(ValidationException.class, () -> UserValidator.validate(user));
+        Exception exception = assertThrows(ValidationException.class, () -> userValidator.validate(user));
         assertEquals("Login cannot be empty and contain spaces", exception.getMessage());
     }
 
     @Test
     void addUserShouldValidateUserWithEmptyName() {
         User user = new User(1, "Test@yandex.ru", "Averin", "", LocalDate.of(12,12,20));
-        UserValidator.checkName(user);
+        userValidator.checkName(user);
         assertEquals("Averin", user.getName());
     }
 }
