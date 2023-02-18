@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
 import java.util.Comparator;
@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final static int TOP = 10;
     private final FilmStorage filmStorage;
     private final FilmValidator filmValidator;
 
@@ -39,14 +38,14 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public void addLike(long id, long userId) throws NotFoundException {
+    public void addLike(long id, long userId) {
         Film film = filmStorage.getById(id);
         film.addLike(userId);
         filmStorage.update(film);
         log.info("Film with id = {} was liked by user with id = {}", film.getId(), userId);
     }
 
-    public void removeLike(long id, long userId) throws NotFoundException {
+    public void removeLike(long id, long userId) {
         Film film = filmStorage.getById(id);
         boolean result = film.removeLike(userId);
         if (!result) {

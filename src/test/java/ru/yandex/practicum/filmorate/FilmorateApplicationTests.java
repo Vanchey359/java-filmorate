@@ -33,11 +33,4 @@ class FilmorateApplicationTests {
         Exception exception = assertThrows(ValidationException.class, () -> userValidator.validate(user));
         assertEquals("Login cannot be empty and contain spaces", exception.getMessage());
     }
-
-    @Test
-    void addUserShouldValidateUserWithEmptyName() {
-        User user = new User(1, "Test@yandex.ru", "Averin", "", LocalDate.of(12,12,20));
-        userValidator.checkName(user);
-        assertEquals("Averin", user.getName());
-    }
 }

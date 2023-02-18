@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -36,12 +34,12 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public User create(@Valid @RequestBody User user) throws ValidationException {
+    public User create(@Valid @RequestBody User user) {
         return userService.add(user);
     }
 
     @PutMapping(value = "/users")
-    public User update(@Valid @RequestBody User user) throws ValidationException, NotFoundException {
+    public User update(@Valid @RequestBody User user) {
         return userService.update(user);
     }
 

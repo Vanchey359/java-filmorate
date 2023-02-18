@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,7 +36,6 @@ public class ErrorHandler {
     }
 
     @AllArgsConstructor
-    @NoArgsConstructor
     @Getter
     private static class ErrorResponse {
         private String message;

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -38,12 +36,12 @@ public class FilmController {
     }
 
     @PostMapping(value = "/films")
-    public Film create(@Valid @RequestBody Film film) throws ValidationException {
+    public Film create(@Valid @RequestBody Film film) {
         return filmService.add(film);
     }
 
     @PutMapping(value = "/films")
-    public Film update(@Valid @RequestBody Film film) throws ValidationException, NotFoundException {
+    public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
     }
 
