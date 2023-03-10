@@ -1,15 +1,15 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -25,13 +25,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(long id) throws NotFoundException {
+    public Optional<Film> getById(Long id) throws NotFoundException {
         Film film = films.get(id);
         if (film == null) {
             throw new NotFoundException("Film with id was not found");
         }
         log.info("Got a film with id = {}", film.getId());
-        return film;
+        return Optional.of(film);
     }
 
     @Override
@@ -53,8 +53,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(Film film) {
+    public Film delete(Film film) {
         films.remove(film.getId());
         log.info("Film {} has been deleted", film.getName());
+        return film;
     }
 }
