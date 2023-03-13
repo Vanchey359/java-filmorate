@@ -28,7 +28,7 @@ public class MPAController {
     @GetMapping
     public Collection<Mpa> findAll() {
         log.info("Request all mpa");
-        return mpaService.getMpa();
+        return mpaService.getAllMpa();
     }
 
     @GetMapping("/{id}")

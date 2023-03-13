@@ -1,44 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.Collection;
 
-@Component
+@Service
 @Slf4j
 public class GenreService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final GenreStorage genreStorage;
 
-    public GenreService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Autowired
+    public GenreService(GenreStorage genreStorage) {
+        this.genreStorage = genreStorage;
     }
 
     public Collection<Genre> getGenres() {
-        return jdbcTemplate.query("SELECT * FROM genres",
-                ((rs, rowNum) -> new Genre(
-                        rs.getInt("genre_id"),
-                        rs.getString("genre"))
-                ));
+        return genreStorage.getGenres();
     }
 
-
     public Genre getGenre(int id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT genre FROM genres WHERE genre_id = ?", id);
-        if (userRows.next()) {
-            Genre genre = new Genre(
-                    id,
-                    userRows.getString("genre")
-            );
-            log.info("Response genre = {} ", genre);
-            return genre;
-        } else {
-            throw new NotFoundException("Attempt to get genre with absent id");
-        }
+        return genreStorage.getGenre(id);
     }
 }
