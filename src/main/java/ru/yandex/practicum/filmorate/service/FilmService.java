@@ -1,31 +1,37 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class FilmService {
 
     private final FilmStorage filmStorage;
     private final FilmValidator filmValidator;
+    private final LikesStorage likesStorage;
+    private Long id = 0L;
 
-    public List<Film> getAll() {
-        return filmStorage.getAll();
+    @Autowired
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, FilmValidator filmValidator, LikesStorage likesStorage) {
+        this.filmStorage = filmStorage;
+        this.filmValidator = filmValidator;
+        this.likesStorage = likesStorage;
     }
 
-    public Film getById(long id) {
-        return filmStorage.getById(id);
+    private Long generateId() {
+        return ++id;
     }
 
     public Film add(Film film) {
@@ -35,33 +41,42 @@ public class FilmService {
 
     public Film update(Film film) {
         filmValidator.validate(film);
-        return filmStorage.update(film);
-    }
-
-    public void addLike(long id, long userId) {
-        Film film = filmStorage.getById(id);
-        film.addLike(userId);
         filmStorage.update(film);
-        log.info("Film with id = {} was liked by user with id = {}", film.getId(), userId);
+        Film filmReturn = filmStorage.getById(film.getId()).orElseThrow(
+                () -> new NotFoundException("Request film with absent id"));
+        if (film.getGenres() == null) {
+            filmReturn.setGenres(null);
+        } else if (film.getGenres().isEmpty()) {
+            filmReturn.setGenres(new HashSet<>());
+        }
+        return filmReturn;
     }
 
-    public void removeLike(long id, long userId) {
-        Film film = filmStorage.getById(id);
-        boolean result = film.removeLike(userId);
-        if (!result) {
-            throw new NotFoundException("Like not found, nothing to delete!");
-        }
-        filmStorage.update(film);
-        log.info("User with id = {} was deleted like from movie id = {}", userId, film.getId());
+    public Collection<Film> getAll() {
+        return filmStorage.getAll();
     }
 
-    public List<Film> getTop(int count) {
-        if (count <= 0) {
-            throw new NotFoundException("The number of films cannot be negative or equal to zero!");
-        }
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(Film::countLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+    public Film getById(Long id) {
+        return filmStorage.getById(id)
+                .orElseThrow(() -> new NotFoundException("Request film with absent id"));
+    }
+
+    public Film delete(Film film) {
+        filmStorage.delete(film);
+        return film;
+    }
+
+    public void addLike(Long id, Long userId) {
+        likesStorage.addLike(id, userId);
+        log.info("User id = {} set like film id = {}", userId, id);
+    }
+
+    public void removeLike(Long id, Long userId) {
+        likesStorage.removeLike(id, userId);
+        log.info("User id = {} deleted like to film id = {}", userId, id);
+    }
+
+    public List<Film> getFilmsByRating(int count) {
+        return likesStorage.getPopular(count);
     }
 }

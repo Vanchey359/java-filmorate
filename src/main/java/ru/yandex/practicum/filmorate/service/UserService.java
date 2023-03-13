@@ -1,30 +1,36 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.friends.FriendsStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorage userStorage;
     private final UserValidator userValidator;
+    private final FriendsStorage friendsStorage;
+    private Long id = 0L;
 
-    public List<User> getAll() {
-        return userStorage.getAll();
+    @Autowired
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, UserValidator userValidator, FriendsStorage friendsStorage) {
+        this.userStorage = userStorage;
+        this.userValidator = userValidator;
+        this.friendsStorage = friendsStorage;
     }
 
-    public User getById(long id) {
-        return userStorage.getById(id);
+    private Long generateId() {
+        return id++;
     }
 
     public User add(User user) {
@@ -39,39 +45,37 @@ public class UserService {
         return userStorage.update(user);
     }
 
-    public void addFriends(long id, long friendId) {
-        User user = userStorage.getById(id);
-        User friend = userStorage.getById(friendId);
-        user.addFriend(friendId);
-        friend.addFriend(id);
-        log.info("Users {} and {} now friends!" , user.getName(), friend.getName());
+    public Collection<User> getAll() {
+        System.out.println(userStorage.getAll());
+        return userStorage.getAll();
     }
 
-    public void removeFriends(long id, long friendId) {
-        User user = userStorage.getById(id);
-        User friend = userStorage.getById(friendId);
-        user.removeFriend(friendId);
-        friend.removeFriend(id);
-        log.info("Users {} and {} stopped being friends!" , user.getName(), friend.getName());
+    public User delete(User user) {
+        return userStorage.delete(user);
     }
 
-    public List<User> getAllFriends(long id) {
-        List<User> friends = new ArrayList<>();
-        List<Long> friendsIds = userStorage.getById(id).getFriends().stream()
-                .distinct()
-                .collect(Collectors.toList());
-        for (long friendId : friendsIds) {
-            User friend = userStorage.getById(friendId);
-            friends.add(friend);
-        }
-        return friends;
+    public User getById(long id) {
+        return userStorage.getById(id)
+                .orElseThrow(() -> new NotFoundException("Request user with absent id"));
     }
 
-    public List<User> getCommonFriends(long id, long otherId) {
-        List<User> first = getAllFriends(id);
-        List<User> second = getAllFriends(otherId);
-        return first.stream()
-                .filter(second::contains)
+    public void addFriend(Long id, Long friendId) {
+        friendsStorage.addFriend(id, friendId);
+        log.info("User id = {} added to friends user id={}", id, friendId);
+    }
+
+    public void deleteFriend(Long id, Long friendId) {
+        friendsStorage.deleteFriend(id, friendId);
+        log.info("User id = {} deleted from friends user id={}", id, friendId);
+    }
+
+    public Collection<User> findFriends(Long id) {
+        return friendsStorage.findFriends(id);
+    }
+
+    public Collection<User> findSharedFriends(Long id, Long otherId) {
+        return findFriends(id).stream()
+                .filter(x -> findFriends(otherId).contains(x))
                 .collect(Collectors.toList());
     }
 
