@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -24,13 +25,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(long id) throws NotFoundException {
+    public Optional<User> getById(long id) throws NotFoundException {
         User user = users.get(id);
         if (user == null) {
             throw new NotFoundException("User with id was not found");
         }
         log.info("Got a user with id = {}", user.getId());
-        return user;
+        return Optional.of(user);
     }
 
     @Override
@@ -52,8 +53,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void delete(User user) {
+    public User delete(User user) {
         users.remove(user.getId());
         log.info("User {} has been deleted", user.getName());
+        return user;
     }
 }
