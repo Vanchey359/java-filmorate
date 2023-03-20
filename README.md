@@ -1,3 +1,6 @@
-# java-filmorate
-Template repository for Filmorate project.
+# java-Filmopoisk
+Проект был создан в целях закрепления знаний по стеку технологий:  Java + Spring Boot + Maven + Lombok + JUnit + RESTful API + SQL +  database
+
+Данный проект является веб сервисом по рекомендации фильмов к просмотру. Основными функциями сервиса является работа с оценками пользователей и рекомендация фильмов к просмотру, так же имеется функция выбыорки топ 5 фильмов на основе оценок.
+
 ![DB_Model](https://user-images.githubusercontent.com/78901089/221889961-d9238058-729a-4360-a179-fea8544bc6fb.png)
